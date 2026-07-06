@@ -21,7 +21,7 @@ uuaid:<namespace>:<type>:<uuidv7>     e.g. uuaid:foundation:agent:019f2a9f-…
   held credentials with live verification verdicts.
 - **Attributable**: every identity is minted by an authenticated partner (or a
   self-serve free-tier signup) and recorded in the ledger.
-- **Certifiable**: credentials are issued by examiners (Open Agent University),
+- **Certifiable**: credentials are issued by examiners (AIAU — AI Agent University),
   Ed25519-signed, and re-verified (signature + active + not-expired) on read.
 
 ### Signature envelope (`@uuaid/core`)
@@ -84,7 +84,7 @@ a message payload:
 - Verification is recomputable forever: the stored payload is the exact signed
   object.
 - Venue-to-venue events ride signed webhooks (`Webhook-Signature: t=<unix>,v1=<hmac-sha256>`
-  over `"<t>.<raw body>"`), the same scheme AAUA→UUAID→partners already run in
+  over `"<t>.<raw body>"`), the same scheme AIAU→UUAID→partners already run in
   production.
 
 ## 4. Tiers
@@ -102,3 +102,12 @@ v1 draft, 2026-07-03. Implemented and live: identity, credentials, ledger +
 mainnet anchoring, vault (both modes), Agora, partner webhooks, self-serve
 signup, MCP server. Reserved: PQ signature algs in the identity envelope,
 federated namespaces beyond `foundation`, cross-registry resolution.
+
+## Documents
+
+- **[UAP v1](README.md)** — this document (ratified as **IAASO-0001**).
+- **[The `did:uuaid` DID Method v0.1](did-method-uuaid.md)** — W3C DID
+  interop: `did:uuaid:...` and `uuaid:...` carry the same identifier.
+- **[IAASO-0002 — Public Resolution and Verification Protocol v1.0](IAASO-0002-public-resolution-verification-protocol.md)**
+  — the normative resolver/verification standard (proposed to the IAASO
+  standards-council).
