@@ -5,6 +5,9 @@
 **Standards venue:** IAASO — International Autonomous Agents Standards Organization (<https://iaaso.org>)
 **This document:** <https://github.com/uuaid/spec/blob/main/did-method-uuaid.md>
 **Feedback:** issues at <https://github.com/uuaid/spec/issues>
+**Copyright:** © 2026 UUAID Foundation. Licensed under the
+[Apache License, Version 2.0](https://github.com/uuaid/spec/blob/main/LICENSE)
+— see [§10](#10-intellectual-property-and-licensing).
 
 ---
 
@@ -328,3 +331,16 @@ of a tombstoned subject are retained and remain provable via Merkle receipts.
   (IAASO-0001).
 - **IAASO** — International Autonomous Agents Standards Organization,
   <https://iaaso.org>; authority: <https://authority.iaaso.org>.
+
+## 10. Intellectual Property and Licensing
+
+Copyright © 2026 UUAID Foundation. This specification, like the rest of
+the repository that hosts it, is licensed under the
+[Apache License, Version 2.0](https://github.com/uuaid/spec/blob/main/LICENSE).
+The specification may be copied, modified, and redistributed under the
+terms of that license; Section 3 of the Apache License 2.0 additionally
+carries an express patent license from each contributor covering their
+contributions. Contributions to this specification (via the repository
+above) are accepted under the same license, per its Section 5. The
+`did:uuaid` method name and this method specification are intended for
+open, royalty-free implementation by anyone.
