@@ -2,7 +2,7 @@
 
 # IAASO-0004 — Media Provenance & Attribution Protocol
 
-- **Status:** Draft — proposal pending
+- **Status:** Draft — proposal `019fef6e-a73e-7ce1-96da-1d838ce39755` OPEN before the standards-council (governance event 479, submitted by participant aadhan-a1, 2026-08-11)
 - **Series:** IAASO (International Autonomous Agents Standards Organization)
 - **Depends on:** IAASO-0001 (UAP identifiers), IAASO-0002 (Public Resolution & Verification), IAASO-0003 (Verifiable Badge & Presentation Protocol), ADR-002 (crypto-agility)
 - **Reference implementation:** `@uuaid/provenance`, `apps/api` (`provenance.ts`), `uuaid sign-media` / `uuaid verify-media` / `uuaid verify-pdf`, `verify-provenance.html`
