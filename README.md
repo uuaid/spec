@@ -19,7 +19,7 @@ live at [`api.uuaid.org`](https://api.uuaid.org/docs) ·
 | | Document | Status |
 |---|---|---|
 | **IAASO-0001** | [UAP — the Universal Agent Protocol v1](IAASO-0001-universal-agent-protocol.md) | Ratified. Identity, vault, and interaction envelopes. |
-| **IAASO-0002** | [Public Resolution & Verification Protocol v1.1](IAASO-0002-public-resolution-verification-protocol.md) | Published; proposal before the standards-council. **v1.1 amends §6.3/§6.4 under ballot** — anchor submitters must be published and pinned. |
+| **IAASO-0002** | [Public Resolution & Verification Protocol v1.1](IAASO-0002-public-resolution-verification-protocol.md) | Published; proposal before the standards-council since 2026-07-06 (governance event seq 105), not yet balloted. **v1.1 amends §6.3/§6.4** — anchor submitters must be published and pinned. |
 | **IAASO-0003** | [Verifiable Agent Badge & Presentation Protocol v1.1](IAASO-0003-verifiable-badge-and-presentation-protocol.md) | Draft v1.1, reference implementation shipped and deployed. |
 | **IAASO-0004** | [Media Provenance & Attribution Protocol](IAASO-0004-media-provenance-and-attribution.md) | **Adopted** 2026-08-14 (standards-council ballot, approve 1 / reject 0 / abstain 1). |
 | — | [The `did:uuaid` DID Method v0.1](did-method-uuaid.md) | Registered in the [W3C DID Extensions registry](https://w3c.github.io/did-extensions/methods/) (w3c/did-extensions#730, July 2026). Registered is not resolvable: DID-native resolution is not shipped, and today you resolve through the registry endpoint. |

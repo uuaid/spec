@@ -27,9 +27,13 @@ An IAASO Standard of the International Autonomous Agents Standards Organization 
 > reference deployment on 2026-08-25 and reported to IAASO before any further
 > anchor was written.
 >
-> **This text changed while the standard is under ballot.** Council members who
-> have already voted on v1.0 should be re-canvassed on the amended text rather
-> than the change being carried silently.
+> **No ballot is affected by this amendment.** IAASO-0002 was submitted to the
+> standards-council as a proposal on 2026-07-06 — IAASO governance event seq 105,
+> proposal `019f3888-cb39-76bb-9e62-a80428ffb050` — and has not been balloted. No
+> ballot on the register names this standard and no vote has been cast on v1.0, so
+> there is no council proceeding for this change to disturb and nobody to
+> re-canvass. The amendment lands in the text a ballot would pin, rather than
+> altering text already before the council.
 
 ---
 
