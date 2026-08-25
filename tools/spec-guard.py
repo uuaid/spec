@@ -51,6 +51,7 @@ TABLE_VERSION = re.compile(r"^\|\s*Version\s*\|\s*(\S+?)\s*\|\s*$", re.M)
 FOOTER = re.compile(
     r"^\*End of (IAASO-\d{4}) v([0-9]+(?:\.[0-9]+)*)(?:\s*\([^)]*\))?\.\*\s*$", re.M
 )
+CHANGE_NOTE = re.compile(r"Change in v([0-9]+(?:\.[0-9]+)*)\s*\((\d{4}-\d{2}-\d{2})\)")
 META_HEADING = re.compile(r"^##\s+\d+\.\s+Document Metadata\s*$", re.M)
 FENCE = re.compile(r"^```yaml\s*$(.*?)^```\s*$", re.M | re.S)
 
@@ -90,7 +91,12 @@ def top_level_yaml(block: str) -> dict[str, str]:
     return out
 
 
-def check_terminal_newline(path: str) -> None:
+def check_byte_stability(path: str) -> None:
+    """The exact byte sequence a content_hash is taken over must be stable.
+
+    Three ways it moves with no semantic change at all: a stripped terminal
+    newline, a re-appended blank line, and a line-ending rewrite.
+    """
     with open(path, "rb") as fh:
         data = fh.read()
     if not data:
@@ -104,6 +110,20 @@ def check_terminal_newline(path: str) -> None:
             path,
             "does not end with a newline (0a). A stripped trailing newline "
             "silently changes the content_hash of a pinned document.",
+        )
+    elif data.endswith(b"\n\n"):
+        fail(
+            path,
+            "ends with more than one newline. Trailing blank lines are "
+            "silently normalised by common tooling, which moves the "
+            "content_hash of a pinned document.",
+        )
+    if b"\r" in data:
+        fail(
+            path,
+            "contains a CR byte (CRLF or a lone CR). A line-ending rewrite "
+            "changes every line and so the content_hash, with no semantic "
+            "change whatsoever.",
         )
 
 
@@ -172,6 +192,29 @@ def check_intrinsic_metadata(path: str) -> None:
         except ValueError:
             fail(path, f"metadata date {date!r} is not a real calendar date")
 
+    # -- date agrees with this version's change note -------------------------
+    # `date` is the publication date of THIS version (SGM 8.1); stage-entry
+    # dating is the 5.3 transition record's "decision date" and lives on the
+    # governance chain. So the in-file witness for `date` is the change note,
+    # and it is never derived from git: a guard that rewrote `date` would be a
+    # new way to move a content_hash, which is the defect it exists to prevent.
+    notes_by_version = dict(CHANGE_NOTE.findall(text))
+    version = meta.get("version")
+    if notes_by_version and version:
+        if version not in notes_by_version:
+            fail(
+                path,
+                f"declares version {version!r} and carries change notes for "
+                + ", ".join(repr(v) for v in sorted(notes_by_version))
+                + f", but none for {version!r}",
+            )
+        elif date and notes_by_version[version] != date:
+            fail(
+                path,
+                f"metadata date {date!r} disagrees with the v{version} change "
+                f"note dated {notes_by_version[version]!r}",
+            )
+
     # -- doc_url: a fixpoint, so it must stay a placeholder ------------------
     doc_url = meta.get("doc_url")
     if doc_url is None:
@@ -197,7 +240,7 @@ def main() -> int:
     for path in files:
         if not os.path.isfile(path):
             continue
-        check_terminal_newline(path)
+        check_byte_stability(path)
 
     for path in files:
         if path.endswith(".md") and os.path.isfile(path):
