@@ -227,6 +227,17 @@ hybrid badge carries one signature of each algorithm over the **same**
   ⇔ all verified). A verifier that trusts only PQ MAY additionally require an
   `ml-dsa-65` signature and treat its validity as authoritative; the reference
   verifier surfaces this as the `pq-signature` check and a `pqProtected` flag.
+- **The post-quantum signature MUST be pinned in its own right** (§4.3). Validity
+  alone is insufficient, and the failure mode here is subtler than an unpinned
+  badge because the badge can be entirely genuine: since an envelope is valid when
+  *every* signature verifies over the payload, an attacker can **append** their own
+  `ml-dsa-65` signature to a real registry badge without touching the payload, the
+  `payloadHash`, or the registry's classical signature. The badge still pins to L1;
+  the appended signature is still valid; and a verifier that derives quantum
+  assurance from validity alone will report the attacker's signature as the
+  issuer's. A verifier MUST NOT report quantum assurance for a PQ signature whose
+  key is not in the pinned set, and SHOULD report it as present-but-unattested.
+  (Added in v1.1 after this was found in the reference implementation.)
 - Verifiers that cannot evaluate ML-DSA-65 (e.g. today's browser WebCrypto, which
   has no ML-DSA) MUST verify the classical signature, MUST report the PQ
   signature as present-but-unverified, and MUST NOT report full quantum
