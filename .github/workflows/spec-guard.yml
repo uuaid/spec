@@ -1,0 +1,23 @@
+name: spec-guard
+
+# Every document here is hash-pinned by an IAASO register ballot
+# (doc_url@<commit> + content_hash). This job checks that each document's
+# INTRINSIC metadata agrees with its own bytes. It deliberately does not
+# compare anything against the live register: stage and other extrinsic
+# fields are external state that frozen bytes cannot track.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  intrinsic-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: python3 tools/spec-guard.py
