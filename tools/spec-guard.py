@@ -26,6 +26,12 @@ there is NOT a defect and this guard deliberately does not test for it.
 ``doc_url`` is a blob URL containing the commit SHA of the very bytes that
 carry it, writing a real URL into the field changes the SHA the field names.
 It is a fixpoint, so it must stay a placeholder forever -- an intrinsic rule.
+IAASO ADR-009 (Accepted 2026-08-25) fixes both ends of that rule: the field
+must be PRESENT and hold EXACTLY ``DOC_URL_PLACEHOLDER`` below, in every
+version and at every stage, ``published`` included. Deleting it is as
+non-conformant as filling it in, and so is rewording it: absence and a
+paraphrase both leave the register/document boundary open to be renegotiated
+by the next editor, which is the one thing a fixpoint exists to prevent.
 
 What this guard must never do
 -----------------------------
@@ -44,6 +50,10 @@ import os
 import re
 import subprocess
 import sys
+
+# The one literal `doc_url` may hold, per ADR-009. Compared by equality, not
+# by substring: "roughly TBD-ish" would be a second thing the field could mean.
+DOC_URL_PLACEHOLDER = "TBD — to be assigned upon ratification (placeholder)"
 
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 HEADER_VERSION = re.compile(r"^\*\*Version\s+(\S+)\*\*\s*$", re.M)
@@ -215,10 +225,17 @@ def check_intrinsic_metadata(path: str) -> None:
                 f"note dated {notes_by_version[version]!r}",
             )
 
-    # -- doc_url: a fixpoint, so it must stay a placeholder ------------------
+    # -- doc_url: a fixpoint, so it must stay THE placeholder ----------------
     doc_url = meta.get("doc_url")
     if doc_url is None:
-        fail(path, "metadata block has no 'doc_url'")
+        fail(
+            path,
+            "metadata block has no 'doc_url'. The field must be present and "
+            f"hold {DOC_URL_PLACEHOLDER!r}: the placeholder is what records "
+            "that the register, not this document, is the binding record of "
+            "doc_url (ADR-009). Delete it and the next editor reads the "
+            "silence as licence to fill the field in.",
+        )
     elif "://" in doc_url:
         fail(
             path,
@@ -226,8 +243,13 @@ def check_intrinsic_metadata(path: str) -> None:
             "commit that carries these bytes, so writing it in changes the "
             "SHA it names. It must remain a placeholder.",
         )
-    elif "TBD" not in doc_url:
-        fail(path, f"metadata doc_url {doc_url!r} is not the TBD placeholder")
+    elif doc_url != DOC_URL_PLACEHOLDER:
+        fail(
+            path,
+            f"metadata doc_url {doc_url!r} is not the literal placeholder "
+            f"{DOC_URL_PLACEHOLDER!r}. A fixpoint means exactly one string; a "
+            "paraphrase is a second thing the field could mean (ADR-009).",
+        )
 
 
 def main() -> int:
