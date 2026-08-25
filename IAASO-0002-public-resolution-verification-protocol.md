@@ -543,7 +543,7 @@ committee: standards-council
 doc_url: "TBD — to be assigned upon ratification (placeholder)"
 supersedes: none
 language: en
-date: 2026-07-06
+date: 2026-08-25
 registry_operator: UUAID (uuaid.org); UUAID Foundation (nonprofit incorporation in progress; charter: https://uuaid.foundation)
 standards_body: IAASO — International Autonomous Agents Standards Organization (https://iaaso.org)
 contact:
