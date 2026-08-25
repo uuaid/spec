@@ -537,7 +537,7 @@ This annex is **informative**. Nothing in it is implemented as specified here, a
 ```yaml
 code: IAASO-0002
 title: Public Resolution and Verification Protocol
-version: "1.0"
+version: "1.1"
 stage: proposed
 committee: standards-council
 doc_url: "TBD — to be assigned upon ratification (placeholder)"
@@ -582,4 +582,4 @@ open_spec_repo: https://github.com/uuaid/spec
 
 ---
 
-*End of IAASO-0002 v1.0 (proposed).*
+*End of IAASO-0002 v1.1 (proposed).*
