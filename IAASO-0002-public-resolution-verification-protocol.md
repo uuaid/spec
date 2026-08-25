@@ -1,6 +1,6 @@
 # IAASO-0002 — Public Resolution and Verification Protocol
 
-**Version 1.0**
+**Version 1.1**
 
 An IAASO Standard of the International Autonomous Agents Standards Organization (IAASO)
 
@@ -8,10 +8,28 @@ An IAASO Standard of the International Autonomous Agents Standards Organization 
 |---|---|
 | Standard code | IAASO-0002 |
 | Title | Public Resolution and Verification Protocol |
-| Version | 1.0 |
+| Version | 1.1 |
 | Stage | Proposed |
 | Committee | standards-council |
 | Status of this document | Proposed for ratification by the IAASO standards-council |
+
+> **Change in v1.1 (2026-08-25) — normative, security.** §6.3 gains requirements 4–6
+> and §6.4 gains a new step 5: a registry MUST publish the set of addresses it
+> submits anchors from, and a verifier MUST pin that set and reject anchors from
+> outside it.
+>
+> Reason: the anchoring contract is permissionless — any address can append a root
+> — and v1.0's §6.4 never checked who sent the anchoring transaction. It therefore
+> established *"this event is included under some anchor"* while reading as
+> *"…under the registry's anchor"*. An adversary, including a dishonest resolver,
+> could submit an anchor over a tree of their own and serve receipts pointing at
+> it; every other step of the v1.0 procedure passes against that. Found in the
+> reference deployment on 2026-08-25 and reported to IAASO before any further
+> anchor was written.
+>
+> **This text changed while the standard is under ballot.** Council members who
+> have already voted on v1.0 should be re-canvassed on the amended text rather
+> than the change being carried silently.
 
 ---
 
@@ -389,12 +407,15 @@ A receipt MUST contain sufficient information for a third party to recompute `ro
 1. Merkle roots over ledger events MUST be anchored in transactions on a public blockchain. The production anchoring network is **Polygon mainnet**, CAIP-2 chain identifier **`eip155:137`**.
 2. The `anchor.network` member of a receipt MUST identify the anchoring chain by its CAIP-2 identifier.
 3. Anchoring is batched: one anchor covers `eventCount` ledger events under a single root. Anchoring cadence is an operational matter and is not constrained by this Standard.
+4. **The anchoring contract MAY be permissionless, and the reference deployment is.** Any address can append a root to it. It follows that the presence of a root on-chain, the value of a "latest root" accessor, and the count of anchors are all **attacker-influenced** quantities and MUST NOT be treated as registry assertions on their own.
+5. **A conforming registry MUST publish the set of addresses from which it submits anchors**, and MUST serve that set from the same authenticated origin as its cryptographic trust root (for the reference registry, the `anchoring.submitters` member of `GET /.well-known/uuaid-registry.json`). The set MAY contain more than one address, so that a signer rotation does not orphan historical anchors.
+6. **A verifier MUST pin that set** and MUST disregard any anchor whose submitting address is outside it. An anchor is a claim by whoever sent the transaction; only the submitter binds that claim to the registry. This is the same requirement, and the same reasoning, as pinning an issuer key before treating a signature as an identity claim (IAASO-0003 §4.3).
 
 ### 6.4 Offline verification procedure
 
 This procedure allows a third party to verify that a ledger event — for example, an event appearing in a subject's status history (§4.2) — is committed under a public on-chain anchor, **without trusting the resolver**. After step 1, the procedure requires no further interaction with the resolver; its trust base reduces to the hash functions of §6.1–§6.2 (SHA-256 for the event hash chain; Keccak-256 for the Merkle tree) and the consensus of the anchoring chain.
 
-**Inputs:** a receipt (obtained from `GET /iaaso/v1/receipts/:seq`, or from any cache or archive of previously fetched receipts), and independent read access to the anchoring chain (any Polygon mainnet node, self-hosted or third-party, of the verifier's own choosing).
+**Inputs:** a receipt (obtained from `GET /iaaso/v1/receipts/:seq`, or from any cache or archive of previously fetched receipts), the registry's pinned anchor-submitter set (§6.3.5, obtained and cached out of band), and independent read access to the anchoring chain (any Polygon mainnet node, self-hosted or third-party, of the verifier's own choosing).
 
 **Procedure:**
 
@@ -402,12 +423,13 @@ This procedure allows a third party to verify that a ledger event — for exampl
 2. **Bind the receipt to the event of interest.** Confirm that the receipt's `seq` matches the event's `seq` and that the receipt's `leaf` equals the event's ledger hash — for a status-history event, the `ledgerHash` reported in that event (§4.2). A verifier holding the event's full canonical payload SHOULD additionally recompute the event hash per §6.1 (JCS canonicalization, SHA-256) and confirm it matches, rather than trusting the reported hash.
 3. **Recompute the Merkle root.** Starting from `leaf`, iterate over `proof` in order: at each step, concatenate the step's sibling `hash` with the running hash on the side indicated by the step's `position` member (`"left"` → sibling ‖ running; `"right"` → running ‖ sibling) and hash the concatenation with **Keccak-256** (§6.2). The final value MUST equal the receipt's `root`. If it does not, the receipt is invalid: **stop; verification fails.**
 4. **Fetch the anchor transaction independently.** Query the anchoring chain identified by `anchor.network` (`eip155:137`) for the transaction `anchor.txHash`, using an independent node or explorer **not** operated by the resolver.
-5. **Extract and compare the anchored root.** Extract the Merkle root committed in that transaction and confirm it equals the receipt's `root`. If it does not, the receipt is not covered by that anchor: **verification fails.**
-6. **Confirm anchor finality.** Confirm the anchoring transaction is confirmed on `eip155:137` to the verifier's own finality/confirmation-depth policy.
+5. **Confirm the anchor is the registry's.** Confirm the transaction was sent from an address in the pinned submitter set (§6.3.5), and that it was sent to the registry's published anchoring contract. If either fails, the anchor is somebody else's: **verification fails.** Omitting this step reduces the procedure to *"this event is included under some anchor"*, which — because anchoring is permissionless (§6.3.4) — an adversary can satisfy for any root they choose, including by submitting an anchor of their own and then serving receipts that point at it.
+6. **Extract and compare the anchored root.** Extract the Merkle root committed in that transaction and confirm it equals the receipt's `root`. If it does not, the receipt is not covered by that anchor: **verification fails.**
+7. **Confirm anchor finality.** Confirm the anchoring transaction is confirmed on `eip155:137` to the verifier's own finality/confirmation-depth policy.
 
 **Outcome.** If all steps succeed, the verifier has established — with no trust in the resolver beyond step 1's data transport — that the ledger event existed and was committed, in its recorded form and position, no later than the time of the on-chain anchor. Any subsequent tampering with that event by the registry operator would be detectable, because the tampered event could not produce the anchored root.
 
-**What this does and does not prove.** Inclusion receipts prove *inclusion and immutability* of anchored events. They do not, by themselves, prove *completeness* (that the resolver has shown the verifier every event for a subject) or *freshness* (that no newer events exist). Verifiers with completeness or freshness requirements SHOULD compare consecutive `seq` values in a subject's history for gaps, SHOULD note `anchor.eventCount` across receipts, and MAY archive receipts over time to detect equivocation. See also §8.
+**What this does and does not prove.** Inclusion receipts prove *inclusion and immutability* of anchored events **under an anchor the verifier has attributed to the registry** (step 5). Without that attribution they prove only inclusion under some anchor, which is a materially weaker statement than it appears: on a permissionless anchoring contract, an adversary — including a compromised or dishonest resolver — can mint an anchor over a tree of their own construction, and every remaining step of this procedure will pass against it. Receipts do not, by themselves, prove *completeness* (that the resolver has shown the verifier every event for a subject) or *freshness* (that no newer events exist). Verifiers with completeness or freshness requirements SHOULD compare consecutive `seq` values in a subject's history for gaps, SHOULD note `anchor.eventCount` across receipts, and MAY archive receipts over time to detect equivocation. See also §8.
 
 ---
 

@@ -250,6 +250,20 @@ compact; the ~1952-byte public key is published alongside the Ed25519 key at
 
 ## 8. Security considerations
 
+
+**One pattern, four places.** Every trust failure this specification guards against
+is the same sentence: *an object authenticated against a key it carries itself.* A
+badge signature verifies against the badge's own embedded key (§4.3). A hybrid
+badge's post-quantum signature verifies against its own embedded key (§7). A sealed
+presentation challenge verifies against its own embedded key (§6). And in
+IAASO-0002 §6.3, an on-chain anchor is a claim by whoever sent the transaction, on a
+contract anyone may write to. In each case the object is internally consistent and
+proves nothing; in each case the remedy is identical — **pin the origin against a
+set obtained out of band**, and fail closed when you cannot. Implementers who fix
+one of these should search their code for the other three: all four were live in the
+reference implementation simultaneously, and fixing the first did not surface the
+rest.
+
 - **Bearer copy.** A badge without a presentation key (L1) is copyable; anyone
   holding the SVG can present it. Bind sensitive decisions to **L2**.
 - **Snapshot staleness.** A badge reflects status at `issuedAt`. Revocation after
